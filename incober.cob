@@ -37,8 +37,8 @@
                10  INV-Y           PIC 99.
 
        01  BUNKER-STUFF.
-           05  BUNKER-COUNT        PIC 99 VALUE 12.
-           05  BUNKER-TABLE OCCURS 12 TIMES INDEXED BY B-IDX.
+           05  BUNKER-COUNT        PIC 99 VALUE 27.
+           05  BUNKER-TABLE OCCURS 27 TIMES INDEXED BY B-IDX.
                10  BUNK-ACTIVE     PIC X.
                10  BUNK-X          PIC 99.
                10  BUNK-Y          PIC 99.
@@ -80,16 +80,25 @@
                MOVE 'Y' TO INV-ACTIVE (I-IDX)
            END-PERFORM.
 
-           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 27
                MOVE 'Y' TO BUNK-ACTIVE (B-IDX)
-               MOVE 16 TO BUNK-Y (B-IDX)
-               IF B-IDX <= 4
-                   COMPUTE BUNK-X (B-IDX) = B-IDX + 7
+               
+               IF B-IDX <= 9
+                   COMPUTE BUNK-Y (B-IDX) = 14 + 
+                     FUNCTION INTEGER-PART((B-IDX - 1) / 3)
+                   COMPUTE BUNK-X (B-IDX) = 8 + 
+                     FUNCTION MOD(B-IDX - 1, 3)
                ELSE
-                   IF B-IDX <= 8
-                       COMPUTE BUNK-X (B-IDX) = B-IDX + 13
+                   IF B-IDX <= 18
+                       COMPUTE BUNK-Y (B-IDX) = 14 + 
+                         FUNCTION INTEGER-PART((B-IDX - 10) / 3)
+                       COMPUTE BUNK-X (B-IDX) = 18 + 
+                         FUNCTION MOD(B-IDX - 10, 3)
                    ELSE
-                       COMPUTE BUNK-X (B-IDX) = B-IDX + 19
+                       COMPUTE BUNK-Y (B-IDX) = 14 + 
+                         FUNCTION INTEGER-PART((B-IDX - 19) / 3)
+                       COMPUTE BUNK-X (B-IDX) = 28 + 
+                         FUNCTION MOD(B-IDX - 19, 3)
                    END-IF
                END-IF
            END-PERFORM.
@@ -164,7 +173,7 @@
            END-IF.
 
        CHECK-INVADER-BUNKER-COLLISION.
-           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 27
                IF BUNK-ACTIVE (B-IDX) = 'Y'
                    IF INV-X (I-IDX) = BUNK-X (B-IDX) AND
                       INV-Y (I-IDX) = BUNK-Y (B-IDX)
@@ -187,7 +196,7 @@
            END-PERFORM.
 
            IF BULLET-ACTIVE = 'Y'
-               PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+               PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 27
                    IF BUNK-ACTIVE (B-IDX) = 'Y'
                        IF BULLET-X = BUNK-X (B-IDX)
                            IF BULLET-Y = BUNK-Y (B-IDX)
@@ -224,7 +233,7 @@
                END-IF
            END-PERFORM.
 
-           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 27
                IF BUNK-ACTIVE (B-IDX) = 'Y'
                    DISPLAY "#" LINE BUNK-Y (B-IDX) COLUMN BUNK-X (B-IDX)
                END-IF
