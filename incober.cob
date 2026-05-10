@@ -30,7 +30,7 @@
        01  INVADER-STUFF.
            05  INVADER-COUNT       PIC 99 VALUE 50.
            05  INVADER-DIRECTION   PIC S9 VALUE 1.
-           05  INVADER-MOVE-SPEED  PIC 99 VALUE 5.
+           05  INVADER-MOVE-SPEED  PIC 99 VALUE 15.
            05  INVADER-TABLE OCCURS 50 TIMES INDEXED BY I-IDX.
                10  INV-ACTIVE      PIC X.
                10  INV-X           PIC 99.
