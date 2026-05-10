@@ -2,7 +2,8 @@
 
 
 
-https://github.com/user-attachments/assets/22d6d166-efe0-4876-946f-b8918052b31a
+https://github.com/user-attachments/assets/56e3f20f-b797-430e-a243-35c80e3b84ff
+
 
 
 A Space Invaders-like game written in COBOL.It runs in the terminal.
