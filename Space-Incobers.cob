@@ -59,6 +59,7 @@
            05  RAND-VAL                PIC 9V9(8).
            05  RAND-IDX                PIC 99.
            05  SEED                    PIC 9(8).
+           05  GAME-RESULT             PIC X VALUE ' '.
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
@@ -202,6 +203,7 @@
                    PERFORM CHECK-INVADER-BUNKER-COLLISION
 
                    IF INV-Y (I-IDX) >= PLAYER-Y
+                       MOVE 'L' TO GAME-RESULT
                        MOVE 'Y' TO GAME-OVER-FLAG
                    END-IF
                END-IF
@@ -219,6 +221,7 @@
 
        CHECK-EB-COLLISION.
            IF EB-X (EB-IDX) = PLAYER-X AND EB-Y (EB-IDX) = PLAYER-Y
+               MOVE 'L' TO GAME-RESULT
                MOVE 'Y' TO GAME-OVER-FLAG
            END-IF.
 
@@ -273,6 +276,7 @@
                IF INV-ACTIVE (I-IDX) = 'Y' ADD 1 TO REMAINING-INV END-IF
            END-PERFORM.
            IF REMAINING-INV = 0
+               MOVE 'W' TO GAME-RESULT
                MOVE 'Y' TO GAME-OVER-FLAG
            END-IF.
 
@@ -307,8 +311,12 @@
 
        FINALIZE-GAME.
            DISPLAY " " LINE 1 COLUMN 1 WITH BLANK SCREEN.
-           DISPLAY "GAME OVER" LINE 10 COLUMN 15.
+           IF GAME-RESULT = 'W'
+               DISPLAY "MISSION ACCOMPLISHED!" LINE 10 COLUMN 10
+           ELSE
+               DISPLAY "GAME OVER" LINE 10 COLUMN 15
+           END-IF.
            DISPLAY "FINAL SCORE: " LINE 11 COLUMN 15.
            DISPLAY GAME-SCORE LINE 11 COLUMN 28.
-           DISPLAY "PRESS ANY KEY TO EXIT" LINE 13 COLUMN 15.
+           DISPLAY "PRESS ENTER TO EXIT" LINE 13 COLUMN 15.
            ACCEPT INPUT-CHAR.
