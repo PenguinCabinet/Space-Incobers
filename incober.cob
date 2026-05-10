@@ -28,10 +28,10 @@
            05  BULLET-Y            PIC 99.
 
        01  INVADER-STUFF.
-           05  INVADER-COUNT       PIC 99 VALUE 20.
+           05  INVADER-COUNT       PIC 99 VALUE 50.
            05  INVADER-DIRECTION   PIC S9 VALUE 1.
            05  INVADER-MOVE-SPEED  PIC 99 VALUE 5.
-           05  INVADER-TABLE OCCURS 20 TIMES INDEXED BY I-IDX.
+           05  INVADER-TABLE OCCURS 50 TIMES INDEXED BY I-IDX.
                10  INV-ACTIVE      PIC X.
                10  INV-X           PIC 99.
                10  INV-Y           PIC 99.
@@ -43,12 +43,22 @@
                10  BUNK-X          PIC 99.
                10  BUNK-Y          PIC 99.
 
+       01  ENEMY-BULLET-STUFF.
+           05  EB-COUNT            PIC 9 VALUE 2.
+           05  EB-TABLE OCCURS 2 TIMES INDEXED BY EB-IDX.
+               10  EB-ACTIVE       PIC X VALUE 'N'.
+               10  EB-X            PIC 99.
+               10  EB-Y            PIC 99.
+
        01  WORK-VARS.
            05  INPUT-CHAR              PIC X.
            05  HIT-EDGE                PIC X VALUE 'N'.
            05  REMAINING-INV           PIC 99 VALUE 0.
            05  NANOSECONDS             PIC 9(18) COMP-5 VALUE 50000000.
            05  TIMEOUT-VAL             PIC 9 VALUE 0.
+           05  RAND-VAL                PIC 9V9(8).
+           05  RAND-IDX                PIC 99.
+           05  SEED                    PIC 9(8).
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
@@ -58,15 +68,22 @@
            STOP RUN.
 
        INITIALIZE-GAME.
+           MOVE FUNCTION CURRENT-DATE(9:8) TO SEED.
+           COMPUTE RAND-VAL = FUNCTION RANDOM(SEED).
+
            MOVE 20 TO PLAYER-X.
            MOVE 19 TO PLAYER-Y.
            MOVE 'N' TO GAME-OVER-FLAG.
            MOVE 0 TO GAME-SCORE.
            MOVE 0 TO FRAME-COUNT.
-           
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+
+           PERFORM VARYING EB-IDX FROM 1 BY 1 UNTIL EB-IDX > 2
+               MOVE 'N' TO EB-ACTIVE (EB-IDX)
+           END-PERFORM.
+
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 50
                COMPUTE INV-Y (I-IDX) = 2 + 
-                 (2 * FUNCTION INTEGER-PART((I-IDX - 1) / 10))
+                 (1 * FUNCTION INTEGER-PART((I-IDX - 1) / 10))
                COMPUTE INV-X (I-IDX) = 2 + 
                  (1 * FUNCTION MOD(I-IDX - 1, 10))
                MOVE 'Y' TO INV-ACTIVE (I-IDX)
@@ -132,13 +149,49 @@
                END-IF
            END-IF.
 
+           PERFORM UPDATE-ENEMY-BULLETS.
+           PERFORM ENEMY-FIRE-LOGIC.
+
            IF FUNCTION MOD(FRAME-COUNT, INVADER-MOVE-SPEED) = 0
                PERFORM MOVE-INVADERS
            END-IF.
 
+       UPDATE-ENEMY-BULLETS.
+           PERFORM VARYING EB-IDX FROM 1 BY 1 UNTIL EB-IDX > 2
+               IF EB-ACTIVE (EB-IDX) = 'Y'
+                   IF EB-Y (EB-IDX) < GAME-HEIGHT
+                       ADD 1 TO EB-Y (EB-IDX)
+                       PERFORM CHECK-EB-COLLISION
+                   ELSE
+                       MOVE 'N' TO EB-ACTIVE (EB-IDX)
+                   END-IF
+               END-IF
+           END-PERFORM.
+
+       ENEMY-FIRE-LOGIC.
+           COMPUTE RAND-VAL = FUNCTION RANDOM
+           IF RAND-VAL < 0.05
+               PERFORM VARYING EB-IDX FROM 1 BY 1 UNTIL EB-IDX > 2
+                   IF EB-ACTIVE (EB-IDX) = 'N'
+                       PERFORM TRY-ENEMY-FIRE
+                       EXIT PERFORM
+                   END-IF
+               END-PERFORM
+           END-IF.
+
+       TRY-ENEMY-FIRE.
+           COMPUTE RAND-VAL = FUNCTION RANDOM
+           COMPUTE RAND-IDX = FUNCTION INTEGER-PART(RAND-VAL * 50) + 1
+           IF INV-ACTIVE (RAND-IDX) = 'Y'
+               MOVE 'Y' TO EB-ACTIVE (EB-IDX)
+               MOVE INV-X (RAND-IDX) TO EB-X (EB-IDX)
+               MOVE INV-Y (RAND-IDX) TO EB-Y (EB-IDX)
+               ADD 1 TO EB-Y (EB-IDX)
+           END-IF.
+
        MOVE-INVADERS.
            MOVE 'N' TO HIT-EDGE.
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 50
                IF INV-ACTIVE (I-IDX) = 'Y'
                    ADD INVADER-DIRECTION TO INV-X (I-IDX)
                    IF (INV-X (I-IDX) >= GAME-WIDTH) OR 
@@ -156,13 +209,28 @@
 
            IF HIT-EDGE = 'Y'
                MULTIPLY -1 BY INVADER-DIRECTION
-               PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+               PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 50
                    IF INV-ACTIVE (I-IDX) = 'Y'
                        ADD 1 TO INV-Y (I-IDX)
                        PERFORM CHECK-INVADER-BUNKER-COLLISION
                    END-IF
                END-PERFORM
            END-IF.
+
+       CHECK-EB-COLLISION.
+           IF EB-X (EB-IDX) = PLAYER-X AND EB-Y (EB-IDX) = PLAYER-Y
+               MOVE 'Y' TO GAME-OVER-FLAG
+           END-IF.
+
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 27
+               IF BUNK-ACTIVE (B-IDX) = 'Y'
+                   IF EB-X (EB-IDX) = BUNK-X (B-IDX) AND
+                      EB-Y (EB-IDX) = BUNK-Y (B-IDX)
+                       MOVE 'N' TO BUNK-ACTIVE (B-IDX)
+                       MOVE 'N' TO EB-ACTIVE (EB-IDX)
+                   END-IF
+               END-IF
+           END-PERFORM.
 
        CHECK-INVADER-BUNKER-COLLISION.
            PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 27
@@ -175,7 +243,7 @@
            END-PERFORM.
 
        CHECK-COLLISION.
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 50
                IF INV-ACTIVE (I-IDX) = 'Y'
                    IF BULLET-X = INV-X (I-IDX)
                        IF BULLET-Y = INV-Y (I-IDX)
@@ -201,7 +269,7 @@
            END-IF.
            
            MOVE 0 TO REMAINING-INV.
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 50
                IF INV-ACTIVE (I-IDX) = 'Y' ADD 1 TO REMAINING-INV END-IF
            END-PERFORM.
            IF REMAINING-INV = 0
@@ -219,7 +287,13 @@
                DISPLAY "|" LINE BULLET-Y COLUMN BULLET-X
            END-IF.
 
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+           PERFORM VARYING EB-IDX FROM 1 BY 1 UNTIL EB-IDX > 2
+               IF EB-ACTIVE (EB-IDX) = 'Y'
+                   DISPLAY "!" LINE EB-Y (EB-IDX) COLUMN EB-X (EB-IDX)
+               END-IF
+           END-PERFORM.
+
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 50
                IF INV-ACTIVE (I-IDX) = 'Y'
                    DISPLAY "W" LINE INV-Y (I-IDX) COLUMN INV-X (I-IDX)
                END-IF
