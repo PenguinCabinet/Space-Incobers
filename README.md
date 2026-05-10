@@ -1,10 +1,6 @@
 # 👾 Space-Incobers
 
-
-
-https://github.com/user-attachments/assets/56e3f20f-b797-430e-a243-35c80e3b84ff
-
-
+https://github.com/user-attachments/assets/939306db-dac4-4c23-90bb-f3a1d43adbe4
 
 A Space Invaders-like game written in COBOL.It runs in the terminal.
 
