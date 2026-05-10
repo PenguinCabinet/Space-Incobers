@@ -36,6 +36,13 @@
                10  INV-X           PIC 99.
                10  INV-Y           PIC 99.
 
+       01  BUNKER-STUFF.
+           05  BUNKER-COUNT        PIC 99 VALUE 12.
+           05  BUNKER-TABLE OCCURS 12 TIMES INDEXED BY B-IDX.
+               10  BUNK-ACTIVE     PIC X.
+               10  BUNK-X          PIC 99.
+               10  BUNK-Y          PIC 99.
+
        01  WORK-VARS.
            05  INPUT-CHAR              PIC X.
            05  HIT-EDGE                PIC X VALUE 'N'.
@@ -71,6 +78,20 @@
                    END-IF
                END-IF
                MOVE 'Y' TO INV-ACTIVE (I-IDX)
+           END-PERFORM.
+
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+               MOVE 'Y' TO BUNK-ACTIVE (B-IDX)
+               MOVE 16 TO BUNK-Y (B-IDX)
+               IF B-IDX <= 4
+                   COMPUTE BUNK-X (B-IDX) = B-IDX + 7
+               ELSE
+                   IF B-IDX <= 8
+                       COMPUTE BUNK-X (B-IDX) = B-IDX + 13
+                   ELSE
+                       COMPUTE BUNK-X (B-IDX) = B-IDX + 19
+                   END-IF
+               END-IF
            END-PERFORM.
 
        GAME-LOOP.
@@ -123,6 +144,9 @@
                       (INV-X (I-IDX) <= 1)
                        MOVE 'Y' TO HIT-EDGE
                    END-IF
+                   
+                   PERFORM CHECK-INVADER-BUNKER-COLLISION
+
                    IF INV-Y (I-IDX) >= PLAYER-Y
                        MOVE 'Y' TO GAME-OVER-FLAG
                    END-IF
@@ -134,9 +158,20 @@
                PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
                    IF INV-ACTIVE (I-IDX) = 'Y'
                        ADD 1 TO INV-Y (I-IDX)
+                       PERFORM CHECK-INVADER-BUNKER-COLLISION
                    END-IF
                END-PERFORM
            END-IF.
+
+       CHECK-INVADER-BUNKER-COLLISION.
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+               IF BUNK-ACTIVE (B-IDX) = 'Y'
+                   IF INV-X (I-IDX) = BUNK-X (B-IDX) AND
+                      INV-Y (I-IDX) = BUNK-Y (B-IDX)
+                       MOVE 'N' TO BUNK-ACTIVE (B-IDX)
+                   END-IF
+               END-IF
+           END-PERFORM.
 
        CHECK-COLLISION.
            PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
@@ -150,6 +185,19 @@
                    END-IF
                END-IF
            END-PERFORM.
+
+           IF BULLET-ACTIVE = 'Y'
+               PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+                   IF BUNK-ACTIVE (B-IDX) = 'Y'
+                       IF BULLET-X = BUNK-X (B-IDX)
+                           IF BULLET-Y = BUNK-Y (B-IDX)
+                               MOVE 'N' TO BUNK-ACTIVE (B-IDX)
+                               MOVE 'N' TO BULLET-ACTIVE
+                           END-IF
+                       END-IF
+                   END-IF
+               END-PERFORM
+           END-IF.
            
            MOVE 0 TO REMAINING-INV.
            PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
@@ -173,6 +221,12 @@
            PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
                IF INV-ACTIVE (I-IDX) = 'Y'
                    DISPLAY "W" LINE INV-Y (I-IDX) COLUMN INV-X (I-IDX)
+               END-IF
+           END-PERFORM.
+
+           PERFORM VARYING B-IDX FROM 1 BY 1 UNTIL B-IDX > 12
+               IF BUNK-ACTIVE (B-IDX) = 'Y'
+                   DISPLAY "#" LINE BUNK-Y (B-IDX) COLUMN BUNK-X (B-IDX)
                END-IF
            END-PERFORM.
 
