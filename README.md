@@ -1,4 +1,4 @@
-# 👾 incober
+# 👾 Space-incobers
 ![img](img/img.gif)
 
 A Space Invaders-like game written in COBOL.It runs in the terminal.
