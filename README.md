@@ -1,5 +1,8 @@
 # 👾 Space-Incobers
-![img](img/img.mp4)
+
+<video controls width="800">
+  <source src="./img/img.mp4" type="video/mp4">
+</video>
 
 A Space Invaders-like game written in COBOL.It runs in the terminal.
 
