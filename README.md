@@ -1,5 +1,5 @@
 # 👾 Space-Incobers
-![img](img/img.gif)
+![img](img/img.mp4)
 
 A Space Invaders-like game written in COBOL.It runs in the terminal.
 
@@ -8,10 +8,10 @@ COBOLで書かれたスペースインベーダー風のゲーム。ターミナ
 # Usage
 
 ```
-cobc incober.cob
+cobc Space-Incobers.cob
 ```
 ```
-./incober
+./Space-Incobers
 ```
 Press the W key to fire a bullet.      
 Press the A key to move left, and the D key to move right.      
