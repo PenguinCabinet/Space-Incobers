@@ -28,10 +28,10 @@
            05  BULLET-Y            PIC 99.
 
        01  INVADER-STUFF.
-           05  INVADER-COUNT       PIC 99 VALUE 15.
+           05  INVADER-COUNT       PIC 99 VALUE 20.
            05  INVADER-DIRECTION   PIC S9 VALUE 1.
            05  INVADER-MOVE-SPEED  PIC 99 VALUE 5.
-           05  INVADER-TABLE OCCURS 15 TIMES INDEXED BY I-IDX.
+           05  INVADER-TABLE OCCURS 20 TIMES INDEXED BY I-IDX.
                10  INV-ACTIVE      PIC X.
                10  INV-X           PIC 99.
                10  INV-Y           PIC 99.
@@ -64,19 +64,11 @@
            MOVE 0 TO GAME-SCORE.
            MOVE 0 TO FRAME-COUNT.
            
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
-               IF I-IDX <= 5
-                   MOVE 2 TO INV-Y (I-IDX)
-                   COMPUTE INV-X (I-IDX) = I-IDX * 6
-               ELSE 
-                   IF I-IDX <= 10
-                       MOVE 4 TO INV-Y (I-IDX)
-                       COMPUTE INV-X (I-IDX) = (I-IDX - 5) * 6
-                   ELSE
-                       MOVE 6 TO INV-Y (I-IDX)
-                       COMPUTE INV-X (I-IDX) = (I-IDX - 10) * 6
-                   END-IF
-               END-IF
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
+               COMPUTE INV-Y (I-IDX) = 2 + 
+                 (2 * FUNCTION INTEGER-PART((I-IDX - 1) / 10))
+               COMPUTE INV-X (I-IDX) = 2 + 
+                 (1 * FUNCTION MOD(I-IDX - 1, 10))
                MOVE 'Y' TO INV-ACTIVE (I-IDX)
            END-PERFORM.
 
@@ -146,7 +138,7 @@
 
        MOVE-INVADERS.
            MOVE 'N' TO HIT-EDGE.
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
                IF INV-ACTIVE (I-IDX) = 'Y'
                    ADD INVADER-DIRECTION TO INV-X (I-IDX)
                    IF (INV-X (I-IDX) >= GAME-WIDTH) OR 
@@ -164,7 +156,7 @@
 
            IF HIT-EDGE = 'Y'
                MULTIPLY -1 BY INVADER-DIRECTION
-               PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
+               PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
                    IF INV-ACTIVE (I-IDX) = 'Y'
                        ADD 1 TO INV-Y (I-IDX)
                        PERFORM CHECK-INVADER-BUNKER-COLLISION
@@ -183,7 +175,7 @@
            END-PERFORM.
 
        CHECK-COLLISION.
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
                IF INV-ACTIVE (I-IDX) = 'Y'
                    IF BULLET-X = INV-X (I-IDX)
                        IF BULLET-Y = INV-Y (I-IDX)
@@ -209,7 +201,7 @@
            END-IF.
            
            MOVE 0 TO REMAINING-INV.
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
                IF INV-ACTIVE (I-IDX) = 'Y' ADD 1 TO REMAINING-INV END-IF
            END-PERFORM.
            IF REMAINING-INV = 0
@@ -227,7 +219,7 @@
                DISPLAY "|" LINE BULLET-Y COLUMN BULLET-X
            END-IF.
 
-           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 15
+           PERFORM VARYING I-IDX FROM 1 BY 1 UNTIL I-IDX > 20
                IF INV-ACTIVE (I-IDX) = 'Y'
                    DISPLAY "W" LINE INV-Y (I-IDX) COLUMN INV-X (I-IDX)
                END-IF
