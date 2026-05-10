@@ -170,7 +170,7 @@
 
        ENEMY-FIRE-LOGIC.
            COMPUTE RAND-VAL = FUNCTION RANDOM
-           IF RAND-VAL < 0.05
+           IF RAND-VAL < 0.20
                PERFORM VARYING EB-IDX FROM 1 BY 1 UNTIL EB-IDX > 2
                    IF EB-ACTIVE (EB-IDX) = 'N'
                        PERFORM TRY-ENEMY-FIRE
